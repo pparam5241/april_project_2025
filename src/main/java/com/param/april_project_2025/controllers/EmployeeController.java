@@ -1,9 +1,6 @@
 package com.param.april_project_2025.controllers;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,43 +9,52 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.param.april_project_2025.models.EmployeeDto;
+import com.param.april_project_2025.entity.Employee;
+import com.param.april_project_2025.models.EmployeeCreateDto;
+import com.param.april_project_2025.service.EmployeeService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/employee")
+@RequestMapping("/v2/employee")
+@RequiredArgsConstructor
+@Slf4j
 public class EmployeeController {
-	private static Integer nextEmployeeId = 1;
-	private static Map<Integer, EmployeeDto> employees = new HashMap<>();
+
+	private final EmployeeService employeeService;
 
 	@PostMapping
-	public ResponseEntity<String> createEmployee(@RequestBody EmployeeDto employeeDto) {
-		employeeDto.setId(nextEmployeeId);
-		nextEmployeeId++;
-		employees.put(employeeDto.getId(), employeeDto);
-		return ResponseEntity.ok("Employee Created Successfully with ID: " + employeeDto.getId());
+	public ResponseEntity<Employee> createEmployee(@RequestBody @Valid EmployeeCreateDto dto) {
+		log.info("Employee Create Request Received with DTO: {}", dto);
+		Employee emp = employeeService.createEmployee(dto);
+		return ResponseEntity.ok(emp);
 	}
 
 	@GetMapping
-	public ResponseEntity<Collection<EmployeeDto>> fetchAllEmployees() {
-		return ResponseEntity.ok(employees.values());
+	public ResponseEntity<Page<Employee>> fetchAllEmployees(@RequestParam(name = "page") int page,
+			@RequestParam int pageSize) {
+		return ResponseEntity.ok(employeeService.findAllEmployees(page, pageSize));
 	}
 
-	@GetMapping("/{employeeId}")
-	public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable(name = "employeeId") Integer id) {
-		return ResponseEntity.ok(employees.get(id));
-	}
-
-	@PutMapping("/{employeeId}")
-	public ResponseEntity<String> updateEmployeeById(@PathVariable Integer employeeId, @RequestBody EmployeeDto dto) {
-		employees.put(employeeId, dto);
-		return ResponseEntity.ok("Employee Details Updated Successfully!");
+	@PutMapping("/{id}")
+	public ResponseEntity<Employee> updateEmployee(@PathVariable(name = "id") Long empId,
+			@RequestBody @Valid EmployeeCreateDto dto) {
+		return ResponseEntity.ok(employeeService.updateEmployee(empId, dto));
 	}
 	
-	@DeleteMapping("/{employeeId}")
-	public ResponseEntity<String> deleteEmployeeById(@PathVariable Integer employeeId) {
-		employees.remove(employeeId);
+	@DeleteMapping("/{id}")
+	public ResponseEntity<String> deleteEmployeeById(@PathVariable Long id) {
+		employeeService.deleteEmployeeById(id);
 		return ResponseEntity.ok("Employee Deleted Successfully!");
+	}
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
+		return ResponseEntity.ok(employeeService.getEmployeeById(id));
 	}
 }
