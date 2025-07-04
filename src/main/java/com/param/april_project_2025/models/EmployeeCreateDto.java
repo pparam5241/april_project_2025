@@ -12,4 +12,7 @@ public class EmployeeCreateDto {
 
 	@NotNull(message = "Employee salary cannot be null or empty.")
 	private Double salary;
+
+	@NotNull(message = "Department name cannot be null or empty.")
+	private Departments department;
 }
