@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.param.april_project_2025.dao.DepartmentDao;
 import com.param.april_project_2025.entity.Department;
 import com.param.april_project_2025.models.DepartmentCreateDto;
+import com.param.april_project_2025.models.Departments;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,5 +41,9 @@ public class DepartmentService {
 
 	public Department getDepartmentByid(Integer id) {
 		return dao.getDepartmentById(id);
+	}
+	
+	public Department getDepartmentByName(Departments name) {
+		return dao.getByDepartmentName(name);
 	}
 }
